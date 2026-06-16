@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clonaítem PAES</title>
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] },
+  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f7f7f5;color:#1a1a1a;min-height:100vh}
+header{background:#fff;border-bottom:1px solid #e5e5e5;padding:1rem 1.5rem;display:flex;align-items:center;gap:10px}
+header h1{font-size:18px;font-weight:600}
+header span{font-size:12px;background:#EEEDFE;color:#534AB7;padding:2px 8px;border-radius:20px}
+.container{max-width:860px;margin:2rem auto;padding:0 1rem}
+.card{background:#fff;border-radius:12px;border:1px solid #e5e5e5;padding:1.5rem;margin-bottom:1.25rem}
+.card h2{font-size:15px;font-weight:600;margin-bottom:1rem;color:#333}
+.drop{border:2px dashed #d0d0d0;border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:all .15s;background:#fafafa}
+.drop:hover,.drop.drag{border-color:#1D9E75;background:#f0faf5}
+.drop .icon{font-size:32px;margin-bottom:8px}
+.drop p{font-size:14px;color:#666}
+.drop p strong{color:#1a1a1a}
+input[type=file]{display:none}
+.fitem{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f0faf5;border:1px solid #b8e8d4;border-radius:8px;font-size:13px;margin-top:8px;color:#0F6E56}
+.fitem .fname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rm{cursor:pointer;color:#999;font-size:16px;margin-left:auto}
+.rm:hover{color:#e24b4a}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+label{display:block;font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+select,textarea,input[type=text]{width:100%;padding:9px 11px;font-size:14px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit;outline:none;transition:border .15s}
+select:focus,textarea:focus{border-color:#1D9E75}
+textarea{resize:vertical;min-height:70px;line-height:1.5}
+.btn{width:100%;padding:12px;font-size:15px;font-weight:600;background:#1D9E75;color:#fff;border:none;border-radius:8px;cursor:pointer;transition:background .15s;margin-top:4px}
+.btn:hover{background:#0F6E56}
+.btn:disabled{background:#ccc;cursor:not-allowed}
+.spin{display:inline-block;width:16px;height:16px;border:2.5px solid #fff4;border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.status{text-align:center;padding:.75rem;font-size:14px;color:#666;display:none}
+.output{margin-top:1.5rem}
+.empty{text-align:center;padding:3rem;color:#aaa}
+.empty .eicon{font-size:40px;display:block;margin-bottom:10px}
+.meta-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem}
+.chip{font-size:12px;padding:3px 10px;border-radius:20px;background:#f0f0f0;color:#555;border:1px solid #e8e8e8}
+.chip-hab{background:#EEEDFE;color:#534AB7}
+.chip-fig{background:#fff8ee;color:#7a4c0a}
+.validez-box{font-size:13px;padding:10px 12px;background:#f8f8f8;border-radius:8px;margin-bottom:.75rem;color:#555;line-height:1.5;border-left:3px solid #1D9E75}
+.ref-txt{font-size:12px;color:#999;margin-bottom:1rem}
+.vtabs{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.vtab{padding:5px 14px;font-size:13px;border:1px solid #ddd;border-radius:20px;cursor:pointer;background:#f5f5f5;color:#666;transition:all .12s}
+.vtab.on{background:#1D9E75;color:#fff;border-color:#1D9E75}
+.icard{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+.icard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.03em}
+.tf{background:#EAF3DE;color:#3B6D11}
+.tm{background:#FAEEDA;color:#854F0B}
+.td{background:#FCEBEB;color:#A32D2D}
+.tc{background:#E6F1FB;color:#185FA5}
+.fig-box{font-size:13px;padding:9px 12px;background:#fff8ee;border-radius:8px;border-left:3px solid #EF9F27;margin-bottom:.75rem;color:#7a4c0a;line-height:1.5}
+.enun{font-size:15px;line-height:1.8;margin-bottom:1rem}
+.opts{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
+.opt{display:flex;gap:10px;padding:9px 12px;border-radius:8px;border:1px solid #e8e8e8;font-size:14px;line-height:1.6}
+.opt.ck{border-color:#1D9E75;background:#f0faf5}
+.letra{font-weight:700;min-width:20px;color:#999}
+.opt.ck .letra{color:#0F6E56}
+.jlabel{font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.ji{font-size:12px;color:#666;padding:5px 10px;border-left:2px solid #e0e0e0;margin-bottom:3px;line-height:1.6}
+.ji strong{color:#333}
+.cpbtn{font-size:12px;padding:4px 10px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:#f5f5f5;color:#555;transition:background .12s}
+.cpbtn:hover{background:#fff}
+.divider{height:1px;background:#eee;margin:1.5rem 0}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="width:32px;height:32px;background:#1D9E75;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px">📐</div>
+  <h1>Clonaítem PAES</h1>
+  <span>LaTeX ✓</span>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>1. Sube tus pruebas DEMRE</h2>
+    <div class="drop" id="drop">
+      <div class="icon">📄</div>
+      <p><strong>Arrastra PDFs aquí</strong> o haz clic para seleccionar</p>
+      <p style="font-size:12px;margin-top:4px;color:#aaa">Puedes subir múltiples PDFs a la vez — sin límite</p>
+      <input type="file" id="fi" accept=".pdf" multiple>
+    </div>
+    <div id="fl"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Configura la generación</h2>
+    <div class="grid">
+      <div>
+        <label>Asignatura</label>
+        <select id="asig">
+          <option value="">— Detectar del PDF —</option>
+          <option value="Matemática M1">Matemática M1</option>
+          <option value="Matemática M2">Matemática M2</option>
+          <option value="Lenguaje y Comunicación">Lenguaje</option>
+          <option value="Ciencias — Biología">Biología</option>
+          <option value="Ciencias — Química">Química</option>
+          <option value="Ciencias — Física">Física</option>
+          <option value="Historia y Ciencias Sociales">Historia</option>
+        </select>
+      </div>
+      <div>
+        <label>Eje temático</label>
+        <select id="eje">
+          <option value="">— Todos —</option>
+          <option value="Números">Números</option>
+          <option value="Álgebra y Funciones">Álgebra y Funciones</option>
+          <option value="Geometría">Geometría</option>
+          <option value="Probabilidad y Estadística">Probabilidad y Estadística</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad de ítemes</label>
+        <select id="cant">
+          <option value="5">5 ítemes</option>
+          <option value="10">10 ítemes</option>
+          <option value="20" selected>20 ítemes</option>
+          <option value="30">30 ítemes</option>
+        </select>
+      </div>
+      <div>
+        <label>Variantes por ítem</label>
+        <select id="vars">
+          <option value="1">1 clon directo</option>
+          <option value="2">2 variantes</option>
+          <option value="3" selected>3 variantes (fácil/medio/difícil)</option>
+        </select>
+      </div>
+    </div>
+    <label>Instrucción adicional (opcional)</label>
+    <textarea id="extra" placeholder='Ej: "sin calculadora", "contexto ambiental", "nivel 4° medio"'></textarea>
+  </div>
+
+  <button class="btn" id="btn" onclick="generar()">✨ Generar clones PAES</button>
+
+  <div class="status" id="st"></div>
+
+  <div class="output" id="out">
+    <div class="empty">
+      <span class="eicon">📋</span>
+      <p>Los ítemes clonados aparecerán aquí</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const files = [];
+const drop = document.getElementById('drop');
+const fi = document.getElementById('fi');
+
+drop.addEventListener('click', () => fi.click());
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+drop.addEventListener('drop', e => {
+  e.preventDefault(); drop.classList.remove('drag');
+  [...e.dataTransfer.files].filter(f => f.type === 'application/pdf').forEach(add);
+});
+fi.addEventListener('change', e => [...e.target.files].forEach(add));
+
+function add(f) {
+  if (files.find(x => x.name === f.name)) return;
+  files.push(f); renderFiles();
+}
+function rm(n) {
+  const i = files.findIndex(x => x.name === n);
+  if (i !== -1) files.splice(i, 1); renderFiles();
+}
+function renderFiles() {
+  document.getElementById('fl').innerHTML = files.map(f => `
+    <div class="fitem">
+      <span>📄</span>
+      <span class="fname">${f.name} <span style="color:#aaa;font-size:11px">(${Math.round(f.size/1024)}KB)</span></span>
+      <span class="rm" onclick="rm('${f.name}')">✕</span>
+    </div>`).join('');
+}
+
+async function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = () => rej(new Error('Error leyendo archivo'));
+    r.readAsDataURL(file);
+  });
+}
+
+function setStatus(msg, show = true) {
+  const el = document.getElementById('st');
+  el.style.display = show ? 'block' : 'none';
+  el.innerHTML = msg;
+}
+
+async function generar() {
+  const asig  = document.getElementById('asig').value;
+  const eje   = document.getElementById('eje').value;
+  const cant  = document.getElementById('cant').value;
+  const vars  = document.getElementById('vars').value;
+  const extra = document.getElementById('extra').value.trim();
+  const btn   = document.getElementById('btn');
+
+  if (!files.length) { alert('Sube al menos un PDF primero.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span>Generando ítemes...';
+  setStatus('⏳ Procesando PDFs y generando clones con Claude...');
+  document.getElementById('out').innerHTML = '';
+
+  try {
+    const parts = [];
+    for (const f of files) {
+      const b64 = await toBase64(f);
+      parts.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } });
+    }
+
+    const varTxt = vars === '3'
+      ? 'Genera EXACTAMENTE 3 variantes por ítem: "Fácil", "Medio", "Difícil".'
+      : vars === '2' ? 'Genera 2 variantes: "Fácil" y "Difícil".'
+      : 'Genera 1 variante con dificultad "Clon".';
+
+    parts.push({ type: 'text', text: `Eres experto en construcción de ítemes PAES Chile (Marco DEMRE).
+Analiza los documentos adjuntos y genera ${cant} ítemes CLONADOS del eje ${eje || 'que detectes'}.
+
+REGLAS:
+- Conserva: habilidad cognitiva, eje curricular, formato (enunciado + 4 alternativas A-D), nivel PAES.
+- Cambia: contexto, datos, números. Distractores basados en errores típicos reales.
+- Fórmulas en LaTeX: inline $...$ y display $$...$$.
+- Si el ítem requiere figura: describe en descripcion_figura qué dibujar exactamente.
+${asig ? `Asignatura: ${asig}` : 'Detecta la asignatura del documento.'}
+${extra ? `Instrucción adicional: ${extra}` : ''}
+${varTxt}
+
+RESPONDE SOLO CON JSON VÁLIDO, sin markdown ni texto adicional:
+[{"numero":1,"asignatura":"","eje":"","habilidad":"","nivel_cognitivo":"","item_original_referencia":"","tiene_figura":false,"validez_paes":"","variantes":[{"dificultad":"Fácil","enunciado":"","descripcion_figura":null,"alternativas":[{"letra":"A","texto":"","es_clave":false,"justificacion":""}]}]}]` });
+
+    // Llamar al proxy en Vercel (sin CORS)
+    const resp = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: parts }] })
+    });
+
+    const data = await resp.json();
+    const raw = data.content.map(c => c.text || '').join('');
+    const result = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    window._R = result;
+    render(result);
+    setStatus('', false);
+  } catch (err) {
+    setStatus(`❌ Error: ${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generar clones PAES';
+  }
+}
+
+const tagMap = { 'Fácil': 'tf', 'Medio': 'tm', 'Difícil': 'td', 'Clon': 'tc' };
+
+function render(items) {
+  const out = document.getElementById('out');
+  let html = '';
+
+  items.forEach((item, ii) => {
+    html += `
+    <div class="icard" style="margin-bottom:1.5rem">
+      <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid #f0f0f0">
+        <div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#1D9E75">Ítem ${item.numero}</div>
+        <div class="meta-bar">
+          <span class="chip">📚 ${item.asignatura}</span>
+          <span class="chip">Eje: ${item.eje}</span>
+          <span class="chip chip-hab">🧠 ${item.habilidad} · ${item.nivel_cognitivo}</span>
+          ${item.tiene_figura ? '<span class="chip chip-fig">🖼 Requiere figura</span>' : ''}
+        </div>
+        <div class="validez-box"><strong>Validez PAES:</strong> ${item.validez_paes}</div>
+        <div class="ref-txt">Ref: ${item.item_original_referencia}</div>
+      </div>`;
+
+    if (item.variantes.length > 1) {
+      html += `<div class="vtabs">${item.variantes.map((v, i) =>
+        `<button class="vtab ${i === 0 ? 'on' : ''}" onclick="tab(${ii},${i})">${v.dificultad}</button>`
+      ).join('')}</div>`;
+    }
+
+    item.variantes.forEach((v, vi) => {
+      const tc = tagMap[v.dificultad] || 'tc';
+      html += `
+      <div class="vc-${ii}" id="vc-${ii}-${vi}" style="${vi > 0 ? 'display:none' : ''}">
+        <div class="icard-head">
+          <span class="tag ${tc}">${v.dificultad}</span>
+          <button class="cpbtn" onclick="cp(${ii},${vi})">📋 Copiar</button>
+        </div>
+        ${v.descripcion_figura ? `<div class="fig-box">⚠️ <strong>Figura requerida:</strong> ${v.descripcion_figura}</div>` : ''}
+        <div class="enun" id="enun-${ii}-${vi}">${v.enunciado}</div>
+        <div class="opts">${v.alternativas.map(a => `
+          <div class="opt ${a.es_clave ? 'ck' : ''}">
+            <span class="letra">${a.letra}</span>
+            <span id="alt-${ii}-${vi}-${a.letra}">${a.texto}</span>
+          </div>`).join('')}
+        </div>
+        <div>
+          <p class="jlabel">Justificación de alternativas</p>
+          ${v.alternativas.map(a => `
+            <div class="ji">
+              <strong>${a.letra} — ${a.es_clave ? '✓ Clave' : 'Distractor'}:</strong> ${a.justificacion}
+            </div>`).join('')}
+        </div>
+      </div>`;
+    });
+
+    html += `</div><div class="divider"></div>`;
+  });
+
+  out.innerHTML = html;
+
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise([out]).catch(() => {});
+  } else {
+    const poll = setInterval(() => {
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        clearInterval(poll);
+        MathJax.typesetPromise([out]).catch(() => {});
+      }
+    }, 300);
+  }
+}
+
+function tab(ii, vi) {
+  document.querySelectorAll(`.vc-${ii}`).forEach((el, i) => el.style.display = i === vi ? 'block' : 'none');
+  document.querySelectorAll(`[onclick^="tab(${ii},"]`).forEach((el, i) => el.classList.toggle('on', i === vi));
+  if (window.MathJax && window.MathJax.typesetPromise)
+    MathJax.typesetPromise([document.getElementById(`vc-${ii}-${vi}`)]).catch(() => {});
+}
+
+function cp(ii, vi) {
+  const v = window._R[ii].variantes[vi];
+  let txt = `[${v.dificultad}]\n\n${v.enunciado}\n\n`;
+  if (v.descripcion_figura) txt += `[FIGURA: ${v.descripcion_figura}]\n\n`;
+  v.alternativas.forEach(a => { txt += `${a.letra}) ${a.texto}${a.es_clave ? ' ← Clave' : ''}\n`; });
+  txt += '\n--- Justificación ---\n';
+  v.alternativas.forEach(a => { txt += `${a.letra} (${a.es_clave ? 'Clave' : 'Distractor'}): ${a.justificacion}\n`; });
+  navigator.clipboard.writeText(txt).then(() => {
+    const btns = document.querySelectorAll('.cpbtn');
+    const idx = ii * (window._R[ii].variantes.length) + vi;
+    if (btns[idx]) { btns[idx].textContent = '✓ Copiado'; setTimeout(() => { btns[idx].textContent = '📋 Copiar'; }, 2000); }
+  });
+}
+</script>
+</body>
+</html>
