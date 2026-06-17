@@ -167,7 +167,6 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
 </div>
 
 <script>
-// Cargar API key guardada
 const apikeyInput = document.getElementById('apikey');
 apikeyInput.value = localStorage.getItem('clonaitem_apikey') || '';
 apikeyInput.addEventListener('input', () => {
@@ -264,7 +263,6 @@ ${varTxt}
 RESPONDE SOLO CON JSON VÁLIDO, sin markdown ni texto adicional:
 [{"numero":1,"asignatura":"","eje":"","habilidad":"","nivel_cognitivo":"","item_original_referencia":"","tiene_figura":false,"validez_paes":"","variantes":[{"dificultad":"Fácil","enunciado":"","descripcion_figura":null,"alternativas":[{"letra":"A","texto":"","es_clave":false,"justificacion":""}]}]}]` });
 
-    // Llamada directa a Anthropic desde el navegador
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
