@@ -82,6 +82,11 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
 .export-bar{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
 .export-bar .btn{margin-top:0;flex:1;min-width:160px;font-size:13px;padding:10px}
 .lote-info{font-size:13px;color:#888;background:#f0f0f0;border-radius:6px;padding:6px 12px;margin-top:6px;text-align:center}
+.tabla-rendered{margin-bottom:.75rem;overflow-x:auto}
+.tabla-rendered table{border-collapse:collapse;font-size:13px;min-width:200px}
+.tabla-rendered th,.tabla-rendered td{border:1px solid #ccc;padding:6px 14px;text-align:center}
+.tabla-rendered th{background:#f0f4ff;font-weight:700;color:#1a3a7a}
+.tabla-rendered td{background:#fff}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.export-bar{flex-direction:column}}
 </style>
 </head>
@@ -242,7 +247,12 @@ Si el ítem requiere figura geométrica, gráfico cartesiano, recta numérica u 
   * El SVG debe ser matemáticamente correcto y legible
 Si el ítem NO requiere figura: "tiene_figura": false, "svg_figura": null.
 
-TABLAS: si hay tabla de datos, en "tabla_datos" formato: "col1|col2\nval1|val2".
+TABLAS (MUY IMPORTANTE):
+- Si el ítem contiene una tabla de datos, NUNCA la incluyas dentro del enunciado.
+- El enunciado debe referirse a la tabla con algo como "Según la tabla:" o "De acuerdo a los datos:"
+- La tabla va SIEMPRE en el campo "tabla_datos" con formato: "Encabezado1|Encabezado2\nValor1|Valor2\nValor3|Valor4"
+- Ejemplo: "Ingrediente|Precio\n250 g de queso|$2400\n1 kg de tomate|$1800\n1 cebollín|$350"
+- Si no hay tabla: "tabla_datos": null
 
 ${asig?`Asignatura: ${asig}`:'Detecta la asignatura.'}
 ${extra?`Instrucción adicional: ${extra}`:''}
@@ -306,6 +316,18 @@ async function generar() {
   }
 }
 
+// Convierte texto tabla a HTML
+function renderTabla(datos) {
+  if (!datos) return '';
+  const rows = datos.split('\n').filter(r => r.trim());
+  let html = '<div class="tabla-rendered"><table><tbody>';
+  rows.forEach((row, ri) => {
+    const cells = row.split('|').map(c => c.trim());
+    html += '<tr>' + cells.map(c => ri === 0 ? `<th>${c}</th>` : `<td>${c}</td>`).join('') + '</tr>';
+  });
+  return html + '</tbody></table></div>';
+}
+
 const tagMap={'Fácil':'tf','Medio':'tm','Difícil':'td','Clon':'tc'};
 const tagColors={'Fácil':'#3B6D11','Medio':'#854F0B','Difícil':'#A32D2D','Clon':'#185FA5'};
 
@@ -339,9 +361,9 @@ function render(items) {
           <span class="tag ${tc}">${v.dificultad}</span>
           <button class="cpbtn" onclick="cp(${ii},${vi})">📋 Copiar</button>
         </div>
-        ${item.svg_figura?`<div class="svg-box">${item.svg_figura}</div>`:''}
-        ${item.tabla_datos?`<div class="tabla-box">📊 Tabla:\n${item.tabla_datos}</div>`:''}
         <div class="enun" id="enun-${ii}-${vi}">${v.enunciado}</div>
+        ${item.svg_figura?`<div class="svg-box">${item.svg_figura}</div>`:''}
+        ${item.tabla_datos?renderTabla(item.tabla_datos):''}
         <div class="opts">${v.alternativas.map(a=>`
           <div class="opt ${a.es_clave?'ck':''}">
             <span class="letra">${a.letra}</span>
@@ -398,12 +420,14 @@ function buildHTML(modo) {
           ${!limpio?`<span class="item-meta">${item.asignatura} · ${item.eje} · ${item.habilidad}</span><span class="dif-tag" style="background:${tagColors[v.dificultad]||'#185FA5'}">${v.dificultad}</span>`:''}
         </div>`;
 
-      // SVG figura
+      body+=`<div class="enunciado">${v.enunciado}</div>`;
+
+      // SVG figura (después del enunciado)
       if (item.svg_figura) {
         body+=`<div class="svg-wrap">${item.svg_figura}</div>`;
       }
 
-      // Tabla
+      // Tabla (después del enunciado)
       if (item.tabla_datos) {
         const rows=item.tabla_datos.split('\n').filter(r=>r.trim());
         body+=`<table class="data-table"><tbody>`;
@@ -414,7 +438,7 @@ function buildHTML(modo) {
         body+=`</tbody></table>`;
       }
 
-      body+=`<div class="enunciado">${v.enunciado}</div><div class="alternativas">`;
+      body+=`<div class="alternativas">`;
       v.alternativas.forEach(a=>{
         // En modo limpio: NUNCA marcar la clave
         const marcarClave = !limpio && a.es_clave;
