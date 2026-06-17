@@ -91,7 +91,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
   <h1>Clonaítem PAES</h1>
   <span>LaTeX + SVG ✓</span>
 </header>
- 
+
 <div class="container">
   <div class="card">
     <h2>🔑 API Key de Anthropic</h2>
@@ -99,7 +99,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
     <input type="password" id="apikey" placeholder="sk-ant-..." autocomplete="off">
     <p class="key-notice">⚠️ Se guarda solo en tu navegador, nunca sale de tu dispositivo.</p>
   </div>
- 
+
   <div class="card">
     <h2>1. Sube tus pruebas DEMRE</h2>
     <div class="drop" id="drop">
@@ -110,7 +110,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
     </div>
     <div id="fl"></div>
   </div>
- 
+
   <div class="card">
     <h2>2. Configura la generación</h2>
     <div class="grid">
@@ -157,34 +157,34 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
     <label>Instrucción adicional (opcional)</label>
     <textarea id="extra" placeholder='Ej: "sin calculadora", "contexto ambiental", "nivel 4° medio"'></textarea>
   </div>
- 
+
   <button class="btn" id="btn" onclick="generar()">✨ Generar clones PAES</button>
   <div class="status" id="st"></div>
- 
+
   <div class="output" id="out">
     <div class="empty">
       <span class="eicon">📋</span>
       <p>Los ítemes clonados aparecerán aquí</p>
     </div>
   </div>
- 
+
   <div id="export-section" style="display:none">
     <div class="export-bar">
-      <button class="btn btn-html" onclick="exportarHTML(false)">📥 HTML completo</button>
-      <button class="btn btn-pdf" onclick="exportarPDF(false)">🖨️ PDF completo</button>
-      <button class="btn btn-clean" onclick="exportarPDF(true)">📋 PDF limpio (solo ejercicios)</button>
+      <button class="btn btn-html" onclick="exportarHTML()">📥 HTML completo</button>
+      <button class="btn btn-pdf" onclick="exportarPDF('completo')">🖨️ PDF completo</button>
+      <button class="btn btn-clean" onclick="exportarPDF('limpio')">📋 PDF para estudiantes</button>
     </div>
     <p style="font-size:12px;color:#888;margin-top:8px;text-align:center">
-      Completo: con justificación · Limpio: solo enunciado y alternativas, listo para imprimir
+      Completo: con justificación · Para estudiantes: solo preguntas y alternativas sin ningún marcador
     </p>
   </div>
 </div>
- 
+
 <script>
 const apikeyInput = document.getElementById('apikey');
 apikeyInput.value = localStorage.getItem('clonaitem_apikey') || '';
 apikeyInput.addEventListener('input', () => localStorage.setItem('clonaitem_apikey', apikeyInput.value.trim()));
- 
+
 const files = [];
 const drop = document.getElementById('drop');
 const fi = document.getElementById('fi');
@@ -193,7 +193,7 @@ drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add(
 drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
 drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); [...e.dataTransfer.files].filter(f => f.type==='application/pdf').forEach(add); });
 fi.addEventListener('change', e => [...e.target.files].forEach(add));
- 
+
 function add(f) { if (files.find(x=>x.name===f.name)) return; files.push(f); renderFiles(); }
 function rm(n) { const i=files.findIndex(x=>x.name===n); if(i!==-1) files.splice(i,1); renderFiles(); }
 function renderFiles() {
@@ -204,46 +204,53 @@ function renderFiles() {
     <span class="rm" onclick="rm('${f.name}')">✕</span></div>`).join('') +
     (files.length>0?`<div class="lote-info">📦 ${files.length} PDF${files.length>1?'s':''} → ${lotes} lote${lotes>1?'s':''} de 2</div>`:'');
 }
- 
+
 async function toBase64(file) {
   return new Promise((res,rej) => { const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.onerror=()=>rej(new Error('Error')); r.readAsDataURL(file); });
 }
 function setStatus(msg,show=true) { const el=document.getElementById('st'); el.style.display=show?'block':'none'; el.innerHTML=msg; }
 function chunks(arr,n) { const r=[]; for(let i=0;i<arr.length;i+=n) r.push(arr.slice(i,i+n)); return r; }
- 
+
 async function llamarClaude(apikey, pdfParts, cant, eje, asig, vars, extra, numInicio) {
   const varTxt = vars==='3'
     ? 'Genera EXACTAMENTE 3 variantes: "Fácil","Medio","Difícil". Cada variante con contexto y datos distintos.'
     : vars==='2' ? 'Genera 2 variantes: "Fácil" y "Difícil". Contextos distintos.'
     : 'Genera 1 variante con dificultad "Clon".';
- 
+
   const prompt = `Eres experto psicometrista DEMRE. Analiza los documentos PAES adjuntos.
 Genera ${cant} ítemes CLONADOS del eje "${eje||'que detectes'}" numerados desde ${numInicio}.
- 
+
 CALIDAD OBLIGATORIA:
 1. Habilidad cognitiva DEMRE exacta: Representar, Modelar, Resolver o Argumentar.
 2. Enunciado situado, realista, contexto chileno.
 3. 4 alternativas A-D. Clave inequívoca. Distractores = errores típicos reales de estudiantes.
 4. Justificación: qué error conceptual/procedimental genera cada distractor.
 5. LaTeX: inline $...$ y display $$...$$.
- 
-FIGURAS SVG (MUY IMPORTANTE para Matemática):
-- Si el ítem requiere figura geométrica, gráfico cartesiano, recta numérica, diagrama, etc.:
+
+FIGURAS SVG (CRITICO para Matemática):
+Si el ítem requiere figura geométrica, gráfico cartesiano, recta numérica u otro elemento visual:
   pon "tiene_figura": true
-  En "svg_figura": escribe código SVG COMPLETO y válido (viewBox="0 0 300 200", sin xmlns externo).
-  El SVG debe ser limpio, con stroke negro, sin colores de fondo, apto para impresión.
-  Usa <text> para etiquetas, <line> para ejes, <polygon> para figuras, <circle> para puntos.
-  Si el ítem NO requiere figura: "tiene_figura": false, "svg_figura": null.
- 
+  En "svg_figura": escribe SVG completo y válido siguiendo ESTAS REGLAS EXACTAS:
+  * Abre siempre con: <svg viewBox=\'0 0 320 220\' width=\'320\' height=\'220\' style=\'font-family:Arial;font-size:13px\'>
+  * Cierra siempre con: </svg>
+  * Usa comillas simples en todos los atributos SVG para no romper el JSON
+  * stroke=\'#000\' stroke-width=\'1.5\' sin fill de fondo
+  * Ejes cartesianos: <line> con marcas cada 30px y <text> para valores. Origen en (50,170).
+  * Triángulos/polígonos: <polygon points=\'x1,y1 x2,y2 x3,y3\'/>
+  * Puntos: <circle cx=\'x\' cy=\'y\' r=\'4\' fill=\'#000\'/>
+  * Etiquetas: <text x=\'x\' y=\'y\'>texto</text>
+  * El SVG debe ser matemáticamente correcto y legible
+Si el ítem NO requiere figura: "tiene_figura": false, "svg_figura": null.
+
 TABLAS: si hay tabla de datos, en "tabla_datos" formato: "col1|col2\nval1|val2".
- 
+
 ${asig?`Asignatura: ${asig}`:'Detecta la asignatura.'}
 ${extra?`Instrucción adicional: ${extra}`:''}
 ${varTxt}
- 
+
 RESPONDE SOLO JSON VÁLIDO, sin markdown, sin truncar:
 [{"numero":${numInicio},"asignatura":"","eje":"","habilidad":"","nivel_cognitivo":"","item_original_referencia":"","tiene_figura":false,"svg_figura":null,"tabla_datos":null,"validez_paes":"","variantes":[{"dificultad":"Fácil","enunciado":"","alternativas":[{"letra":"A","texto":"","es_clave":false,"justificacion":""},{"letra":"B","texto":"","es_clave":true,"justificacion":""},{"letra":"C","texto":"","es_clave":false,"justificacion":""},{"letra":"D","texto":"","es_clave":false,"justificacion":""}]}]}]`;
- 
+
   const parts = [...pdfParts, {type:'text', text:prompt}];
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method:'POST',
@@ -255,7 +262,7 @@ RESPONDE SOLO JSON VÁLIDO, sin markdown, sin truncar:
   const raw = data.content.map(c=>c.text||'').join('');
   return JSON.parse(raw.replace(/```json|```/g,'').trim());
 }
- 
+
 async function generar() {
   const apikey = document.getElementById('apikey').value.trim();
   const asig   = document.getElementById('asig').value;
@@ -264,19 +271,19 @@ async function generar() {
   const vars   = document.getElementById('vars').value;
   const extra  = document.getElementById('extra').value.trim();
   const btn    = document.getElementById('btn');
- 
+
   if (!apikey) { alert('Ingresa tu API key primero.'); return; }
   if (!apikey.startsWith('sk-ant-')) { alert('La API key debe empezar con sk-ant-'); return; }
   if (!files.length) { alert('Sube al menos un PDF.'); return; }
- 
+
   btn.disabled=true; btn.innerHTML='<span class="spin"></span>Generando ítemes...';
   document.getElementById('out').innerHTML='';
   document.getElementById('export-section').style.display='none';
- 
+
   const lotes = chunks(files,2);
   const porLote = Math.ceil(cant/lotes.length);
   let todos=[], numActual=1;
- 
+
   try {
     for (let i=0; i<lotes.length; i++) {
       setStatus(`⏳ Lote ${i+1} de ${lotes.length}: ${lotes[i].map(f=>f.name).join(', ')}...`);
@@ -298,10 +305,10 @@ async function generar() {
     btn.disabled=false; btn.innerHTML='✨ Generar clones PAES';
   }
 }
- 
+
 const tagMap={'Fácil':'tf','Medio':'tm','Difícil':'td','Clon':'tc'};
 const tagColors={'Fácil':'#3B6D11','Medio':'#854F0B','Difícil':'#A32D2D','Clon':'#185FA5'};
- 
+
 function render(items) {
   const out = document.getElementById('out');
   let html='';
@@ -319,12 +326,12 @@ function render(items) {
         <div class="validez-box"><strong>Validez PAES:</strong> ${item.validez_paes}</div>
         <div class="ref-txt">Ref: ${item.item_original_referencia}</div>
       </div>`;
- 
+
     if (item.variantes.length>1) {
       html+=`<div class="vtabs">${item.variantes.map((v,i)=>
         `<button class="vtab ${i===0?'on':''}" onclick="tab(${ii},${i})">${v.dificultad}</button>`).join('')}</div>`;
     }
- 
+
     item.variantes.forEach((v,vi) => {
       const tc=tagMap[v.dificultad]||'tc';
       html+=`<div class="vc-${ii}" id="vc-${ii}-${vi}" style="${vi>0?'display:none':''}">
@@ -348,18 +355,18 @@ function render(items) {
     });
     html+=`</div><div class="divider"></div>`;
   });
- 
+
   out.innerHTML=html;
   if (window.MathJax&&window.MathJax.typesetPromise) MathJax.typesetPromise([out]).catch(()=>{});
   else { const p=setInterval(()=>{ if(window.MathJax&&window.MathJax.typesetPromise){clearInterval(p);MathJax.typesetPromise([out]).catch(()=>{});}},300); }
 }
- 
+
 function tab(ii,vi) {
   document.querySelectorAll(`.vc-${ii}`).forEach((el,i)=>el.style.display=i===vi?'block':'none');
   document.querySelectorAll(`[onclick^="tab(${ii},"]`).forEach((el,i)=>el.classList.toggle('on',i===vi));
   if(window.MathJax&&window.MathJax.typesetPromise) MathJax.typesetPromise([document.getElementById(`vc-${ii}-${vi}`)]).catch(()=>{});
 }
- 
+
 function cp(ii,vi) {
   const item=window._R[ii]; const v=item.variantes[vi];
   let txt=`ÍTEM ${item.numero} — ${item.asignatura} | ${item.eje} | ${item.habilidad}\n[${v.dificultad}]\n\n${v.enunciado}\n\n`;
@@ -373,26 +380,29 @@ function cp(ii,vi) {
     if(btns[idx]){btns[idx].textContent='✓ Copiado';setTimeout(()=>{btns[idx].textContent='📋 Copiar';},2000);}
   });
 }
- 
+
 // ── Construcción del HTML imprimible ─────────────────────────────────────
-function buildHTML(limpio) {
+// modo: 'completo' | 'limpio'
+// completo = enunciado + alternativas (clave marcada) + justificación + meta
+// limpio   = SOLO enunciado + alternativas sin ningún marcador ni comentario
+function buildHTML(modo) {
+  const limpio = modo === 'limpio';
   const fecha = new Date().toLocaleDateString('es-CL');
-  let body='', pauta='';
- 
+  let body='';
+
   window._R.forEach((item) => {
     item.variantes.forEach(v => {
       body+=`<div class="item-block">
         <div class="item-header">
-          <span class="item-num">Ítem ${item.numero}</span>
-          ${!limpio?`<span class="item-meta">${item.asignatura} · ${item.eje} · ${item.habilidad}</span>`:''}
-          <span class="dif-tag" style="background:${tagColors[v.dificultad]||'#185FA5'}">${v.dificultad}</span>
+          <span class="item-num">${item.numero}.</span>
+          ${!limpio?`<span class="item-meta">${item.asignatura} · ${item.eje} · ${item.habilidad}</span><span class="dif-tag" style="background:${tagColors[v.dificultad]||'#185FA5'}">${v.dificultad}</span>`:''}
         </div>`;
- 
+
       // SVG figura
       if (item.svg_figura) {
         body+=`<div class="svg-wrap">${item.svg_figura}</div>`;
       }
- 
+
       // Tabla
       if (item.tabla_datos) {
         const rows=item.tabla_datos.split('\n').filter(r=>r.trim());
@@ -403,13 +413,16 @@ function buildHTML(limpio) {
         });
         body+=`</tbody></table>`;
       }
- 
+
       body+=`<div class="enunciado">${v.enunciado}</div><div class="alternativas">`;
       v.alternativas.forEach(a=>{
-        body+=`<div class="alt${(!limpio&&a.es_clave)?' clave':''}"><span class="alt-letra">${a.letra})</span> ${a.texto}</div>`;
+        // En modo limpio: NUNCA marcar la clave
+        const marcarClave = !limpio && a.es_clave;
+        body+=`<div class="alt${marcarClave?' clave':''}"><span class="alt-letra">${a.letra})</span> ${a.texto}</div>`;
       });
       body+=`</div>`;
- 
+
+      // Solo en completo: justificación
       if (!limpio) {
         body+=`<div class="justif-block"><p class="justif-title">Justificación:</p>`;
         v.alternativas.forEach(a=>{
@@ -417,23 +430,11 @@ function buildHTML(limpio) {
         });
         body+=`</div>`;
       }
- 
+
       body+=`</div>`;
- 
-      // Acumular pauta para PDF limpio
-      if (limpio) {
-        const clave=v.alternativas.find(a=>a.es_clave);
-        pauta+=`<span class="p-item">Ítem ${item.numero} (${v.dificultad}): <strong>${clave?clave.letra:'?'}</strong></span>`;
-      }
     });
   });
- 
-  const pautaHTML = limpio && pauta ? `
-    <div style="margin-top:3rem;padding-top:1rem;border-top:2px solid #333">
-      <h2 style="font-size:14px;margin-bottom:.75rem">PAUTA DE RESPUESTAS</h2>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:13px">${pauta}</div>
-    </div>` : '';
- 
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -473,24 +474,23 @@ h1{${limpio?'font-size:18px;text-align:center;':'color:#1D9E75;'}border-bottom:2
 <h1>${limpio?'Prueba de Práctica PAES':'Ítemes Clonados PAES'}</h1>
 <p class="fecha">Generado: ${fecha}</p>
 ${body}
-${pautaHTML}
 </body>
 </html>`;
 }
- 
-function exportarHTML(limpio) {
+
+function exportarHTML() {
   if (!window._R||!window._R.length) return;
-  const html=buildHTML(limpio);
+  const html=buildHTML('completo');
   const blob=new Blob([html],{type:'text/html;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url; a.download=`clones-paes-${limpio?'limpio-':''}${new Date().toISOString().slice(0,10)}.html`;
+  a.href=url; a.download=`clones-paes-${new Date().toISOString().slice(0,10)}.html`;
   a.click(); URL.revokeObjectURL(url);
 }
- 
-function exportarPDF(limpio) {
+
+function exportarPDF(modo) {
   if (!window._R||!window._R.length) return;
-  const html=buildHTML(limpio);
+  const html=buildHTML(modo);
   const win=window.open('','_blank');
   win.document.write(html);
   win.document.close();
