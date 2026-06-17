@@ -32,16 +32,15 @@ input[type=file]{display:none}
 .rm:hover{color:#e24b4a}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 label{display:block;font-size:12px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
-select,textarea,input[type=text],input[type=password]{width:100%;padding:9px 11px;font-size:14px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit;outline:none;transition:border .15s}
+select,textarea,input[type=password]{width:100%;padding:9px 11px;font-size:14px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit;outline:none;transition:border .15s}
 select:focus,textarea:focus,input:focus{border-color:#1D9E75}
 textarea{resize:vertical;min-height:70px;line-height:1.5}
 .btn{width:100%;padding:12px;font-size:15px;font-weight:600;background:#1D9E75;color:#fff;border:none;border-radius:8px;cursor:pointer;transition:background .15s;margin-top:4px}
 .btn:hover{background:#0F6E56}
 .btn:disabled{background:#ccc;cursor:not-allowed}
-.btn-html{background:#7B3FA0}
-.btn-html:hover{background:#5a2d78}
-.btn-pdf{background:#C0392B}
-.btn-pdf:hover{background:#922b21}
+.btn-html{background:#7B3FA0}.btn-html:hover{background:#5a2d78}
+.btn-pdf{background:#C0392B}.btn-pdf:hover{background:#922b21}
+.btn-clean{background:#2B579A}.btn-clean:hover{background:#1e3f6f}
 .spin{display:inline-block;width:16px;height:16px;border:2.5px solid #fff4;border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-3px;margin-right:6px}
 @keyframes sp{to{transform:rotate(360deg)}}
 .status{text-align:center;padding:.75rem;font-size:14px;color:#666;display:none}
@@ -65,6 +64,7 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
 .td{background:#FCEBEB;color:#A32D2D}
 .tc{background:#E6F1FB;color:#185FA5}
 .fig-box{font-size:13px;padding:9px 12px;background:#fff8ee;border-radius:8px;border-left:3px solid #EF9F27;margin-bottom:.75rem;color:#7a4c0a;line-height:1.5}
+.svg-box{margin-bottom:.75rem;text-align:center;background:#fafafa;border:1px solid #e5e5e5;border-radius:8px;padding:12px}
 .tabla-box{font-size:13px;padding:9px 12px;background:#f0f4ff;border-radius:8px;border-left:3px solid #4A6FD4;margin-bottom:.75rem;color:#1a3a7a;line-height:1.6;font-family:monospace;white-space:pre-wrap}
 .enun{font-size:15px;line-height:1.8;margin-bottom:1rem}
 .opts{display:flex;flex-direction:column;gap:5px;margin-bottom:1rem}
@@ -79,39 +79,38 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
 .cpbtn:hover{background:#fff}
 .divider{height:1px;background:#eee;margin:1.5rem 0}
 .key-notice{font-size:12px;color:#888;margin-top:6px;padding:6px 10px;background:#fffbf0;border-radius:6px;border:1px solid #fde9a0}
-.export-bar{display:flex;gap:10px;margin-top:1rem;flex-wrap:wrap}
-.export-bar .btn{margin-top:0;flex:1;min-width:180px}
-@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.export-bar{display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap}
+.export-bar .btn{margin-top:0;flex:1;min-width:160px;font-size:13px;padding:10px}
+.lote-info{font-size:13px;color:#888;background:#f0f0f0;border-radius:6px;padding:6px 12px;margin-top:6px;text-align:center}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.export-bar{flex-direction:column}}
 </style>
 </head>
 <body>
-
 <header>
   <div style="width:32px;height:32px;background:#1D9E75;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px">📐</div>
   <h1>Clonaítem PAES</h1>
-  <span>LaTeX ✓</span>
+  <span>LaTeX + SVG ✓</span>
 </header>
-
+ 
 <div class="container">
-
   <div class="card">
     <h2>🔑 API Key de Anthropic</h2>
     <label>Tu API Key</label>
     <input type="password" id="apikey" placeholder="sk-ant-..." autocomplete="off">
-    <p class="key-notice">⚠️ La key se guarda solo en tu navegador y nunca sale de tu dispositivo.</p>
+    <p class="key-notice">⚠️ Se guarda solo en tu navegador, nunca sale de tu dispositivo.</p>
   </div>
-
+ 
   <div class="card">
     <h2>1. Sube tus pruebas DEMRE</h2>
     <div class="drop" id="drop">
       <div class="icon">📄</div>
       <p><strong>Arrastra PDFs aquí</strong> o haz clic para seleccionar</p>
-      <p style="font-size:12px;margin-top:4px;color:#aaa">Puedes subir múltiples PDFs — se analizan todos para mejores clones</p>
+      <p style="font-size:12px;margin-top:4px;color:#aaa">Varios PDFs se procesan en lotes de 2 automáticamente</p>
       <input type="file" id="fi" accept=".pdf" multiple>
     </div>
     <div id="fl"></div>
   </div>
-
+ 
   <div class="card">
     <h2>2. Configura la generación</h2>
     <div class="grid">
@@ -158,390 +157,344 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
     <label>Instrucción adicional (opcional)</label>
     <textarea id="extra" placeholder='Ej: "sin calculadora", "contexto ambiental", "nivel 4° medio"'></textarea>
   </div>
-
+ 
   <button class="btn" id="btn" onclick="generar()">✨ Generar clones PAES</button>
   <div class="status" id="st"></div>
-
+ 
   <div class="output" id="out">
     <div class="empty">
       <span class="eicon">📋</span>
       <p>Los ítemes clonados aparecerán aquí</p>
     </div>
   </div>
-
+ 
   <div id="export-section" style="display:none">
     <div class="export-bar">
-      <button class="btn btn-html" onclick="exportarHTML()">📥 Descargar HTML</button>
-      <button class="btn btn-pdf" onclick="exportarPDF()">🖨️ Imprimir / Guardar PDF</button>
+      <button class="btn btn-html" onclick="exportarHTML(false)">📥 HTML completo</button>
+      <button class="btn btn-pdf" onclick="exportarPDF(false)">🖨️ PDF completo</button>
+      <button class="btn btn-clean" onclick="exportarPDF(true)">📋 PDF limpio (solo ejercicios)</button>
     </div>
     <p style="font-size:12px;color:#888;margin-top:8px;text-align:center">
-      HTML: archivo descargable con LaTeX renderizado · PDF: imprime o guarda como PDF desde el navegador
+      Completo: con justificación · Limpio: solo enunciado y alternativas, listo para imprimir
     </p>
   </div>
-
 </div>
-
+ 
 <script>
 const apikeyInput = document.getElementById('apikey');
 apikeyInput.value = localStorage.getItem('clonaitem_apikey') || '';
-apikeyInput.addEventListener('input', () => {
-  localStorage.setItem('clonaitem_apikey', apikeyInput.value.trim());
-});
-
+apikeyInput.addEventListener('input', () => localStorage.setItem('clonaitem_apikey', apikeyInput.value.trim()));
+ 
 const files = [];
 const drop = document.getElementById('drop');
 const fi = document.getElementById('fi');
-
 drop.addEventListener('click', () => fi.click());
 drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
 drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
-drop.addEventListener('drop', e => {
-  e.preventDefault(); drop.classList.remove('drag');
-  [...e.dataTransfer.files].filter(f => f.type === 'application/pdf').forEach(add);
-});
+drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); [...e.dataTransfer.files].filter(f => f.type==='application/pdf').forEach(add); });
 fi.addEventListener('change', e => [...e.target.files].forEach(add));
-
-function add(f) {
-  if (files.find(x => x.name === f.name)) return;
-  files.push(f); renderFiles();
-}
-function rm(n) {
-  const i = files.findIndex(x => x.name === n);
-  if (i !== -1) files.splice(i, 1); renderFiles();
-}
+ 
+function add(f) { if (files.find(x=>x.name===f.name)) return; files.push(f); renderFiles(); }
+function rm(n) { const i=files.findIndex(x=>x.name===n); if(i!==-1) files.splice(i,1); renderFiles(); }
 function renderFiles() {
-  document.getElementById('fl').innerHTML = files.map(f => `
-    <div class="fitem">
-      <span>📄</span>
-      <span class="fname">${f.name} <span style="color:#aaa;font-size:11px">(${Math.round(f.size/1024)}KB)</span></span>
-      <span class="rm" onclick="rm('${f.name}')">✕</span>
-    </div>`).join('');
+  const lotes = Math.ceil(files.length/2);
+  document.getElementById('fl').innerHTML = files.map(f=>`
+    <div class="fitem"><span>📄</span>
+    <span class="fname">${f.name} <span style="color:#aaa;font-size:11px">(${Math.round(f.size/1024)}KB)</span></span>
+    <span class="rm" onclick="rm('${f.name}')">✕</span></div>`).join('') +
+    (files.length>0?`<div class="lote-info">📦 ${files.length} PDF${files.length>1?'s':''} → ${lotes} lote${lotes>1?'s':''} de 2</div>`:'');
 }
-
+ 
 async function toBase64(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result.split(',')[1]);
-    r.onerror = () => rej(new Error('Error leyendo archivo'));
-    r.readAsDataURL(file);
+  return new Promise((res,rej) => { const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.onerror=()=>rej(new Error('Error')); r.readAsDataURL(file); });
+}
+function setStatus(msg,show=true) { const el=document.getElementById('st'); el.style.display=show?'block':'none'; el.innerHTML=msg; }
+function chunks(arr,n) { const r=[]; for(let i=0;i<arr.length;i+=n) r.push(arr.slice(i,i+n)); return r; }
+ 
+async function llamarClaude(apikey, pdfParts, cant, eje, asig, vars, extra, numInicio) {
+  const varTxt = vars==='3'
+    ? 'Genera EXACTAMENTE 3 variantes: "Fácil","Medio","Difícil". Cada variante con contexto y datos distintos.'
+    : vars==='2' ? 'Genera 2 variantes: "Fácil" y "Difícil". Contextos distintos.'
+    : 'Genera 1 variante con dificultad "Clon".';
+ 
+  const prompt = `Eres experto psicometrista DEMRE. Analiza los documentos PAES adjuntos.
+Genera ${cant} ítemes CLONADOS del eje "${eje||'que detectes'}" numerados desde ${numInicio}.
+ 
+CALIDAD OBLIGATORIA:
+1. Habilidad cognitiva DEMRE exacta: Representar, Modelar, Resolver o Argumentar.
+2. Enunciado situado, realista, contexto chileno.
+3. 4 alternativas A-D. Clave inequívoca. Distractores = errores típicos reales de estudiantes.
+4. Justificación: qué error conceptual/procedimental genera cada distractor.
+5. LaTeX: inline $...$ y display $$...$$.
+ 
+FIGURAS SVG (MUY IMPORTANTE para Matemática):
+- Si el ítem requiere figura geométrica, gráfico cartesiano, recta numérica, diagrama, etc.:
+  pon "tiene_figura": true
+  En "svg_figura": escribe código SVG COMPLETO y válido (viewBox="0 0 300 200", sin xmlns externo).
+  El SVG debe ser limpio, con stroke negro, sin colores de fondo, apto para impresión.
+  Usa <text> para etiquetas, <line> para ejes, <polygon> para figuras, <circle> para puntos.
+  Si el ítem NO requiere figura: "tiene_figura": false, "svg_figura": null.
+ 
+TABLAS: si hay tabla de datos, en "tabla_datos" formato: "col1|col2\nval1|val2".
+ 
+${asig?`Asignatura: ${asig}`:'Detecta la asignatura.'}
+${extra?`Instrucción adicional: ${extra}`:''}
+${varTxt}
+ 
+RESPONDE SOLO JSON VÁLIDO, sin markdown, sin truncar:
+[{"numero":${numInicio},"asignatura":"","eje":"","habilidad":"","nivel_cognitivo":"","item_original_referencia":"","tiene_figura":false,"svg_figura":null,"tabla_datos":null,"validez_paes":"","variantes":[{"dificultad":"Fácil","enunciado":"","alternativas":[{"letra":"A","texto":"","es_clave":false,"justificacion":""},{"letra":"B","texto":"","es_clave":true,"justificacion":""},{"letra":"C","texto":"","es_clave":false,"justificacion":""},{"letra":"D","texto":"","es_clave":false,"justificacion":""}]}]}]`;
+ 
+  const parts = [...pdfParts, {type:'text', text:prompt}];
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apikey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify({model:'claude-opus-4-5', max_tokens:16000, messages:[{role:'user',content:parts}]})
   });
+  if (!resp.ok) { const e=await resp.json(); throw new Error(e.error?.message||`Error ${resp.status}`); }
+  const data = await resp.json();
+  const raw = data.content.map(c=>c.text||'').join('');
+  return JSON.parse(raw.replace(/```json|```/g,'').trim());
 }
-
-function setStatus(msg, show = true) {
-  const el = document.getElementById('st');
-  el.style.display = show ? 'block' : 'none';
-  el.innerHTML = msg;
-}
-
+ 
 async function generar() {
   const apikey = document.getElementById('apikey').value.trim();
   const asig   = document.getElementById('asig').value;
   const eje    = document.getElementById('eje').value;
-  const cant   = document.getElementById('cant').value;
+  const cant   = parseInt(document.getElementById('cant').value);
   const vars   = document.getElementById('vars').value;
   const extra  = document.getElementById('extra').value.trim();
   const btn    = document.getElementById('btn');
-
-  if (!apikey) { alert('Ingresa tu API key de Anthropic primero.'); return; }
+ 
+  if (!apikey) { alert('Ingresa tu API key primero.'); return; }
   if (!apikey.startsWith('sk-ant-')) { alert('La API key debe empezar con sk-ant-'); return; }
-  if (!files.length) { alert('Sube al menos un PDF primero.'); return; }
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spin"></span>Generando ítemes...';
-  setStatus('⏳ Analizando PDFs DEMRE y generando clones con Claude...');
-  document.getElementById('out').innerHTML = '';
-  document.getElementById('export-section').style.display = 'none';
-
+  if (!files.length) { alert('Sube al menos un PDF.'); return; }
+ 
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Generando ítemes...';
+  document.getElementById('out').innerHTML='';
+  document.getElementById('export-section').style.display='none';
+ 
+  const lotes = chunks(files,2);
+  const porLote = Math.ceil(cant/lotes.length);
+  let todos=[], numActual=1;
+ 
   try {
-    const parts = [];
-    for (const f of files) {
-      const b64 = await toBase64(f);
-      parts.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } });
+    for (let i=0; i<lotes.length; i++) {
+      setStatus(`⏳ Lote ${i+1} de ${lotes.length}: ${lotes[i].map(f=>f.name).join(', ')}...`);
+      const pdfParts=[];
+      for (const f of lotes[i]) { const b64=await toBase64(f); pdfParts.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}}); }
+      const restantes = cant - todos.length;
+      const items = await llamarClaude(apikey, pdfParts, Math.min(porLote,restantes), eje, asig, vars, extra, numActual);
+      todos = todos.concat(items);
+      numActual += items.length;
     }
-
-    const varTxt = vars === '3'
-      ? 'Genera EXACTAMENTE 3 variantes por ítem con dificultades "Fácil", "Medio", "Difícil". Cada variante debe tener contexto y datos distintos, no solo números cambiados.'
-      : vars === '2' ? 'Genera 2 variantes: "Fácil" y "Difícil". Contextos distintos.'
-      : 'Genera 1 variante con dificultad "Clon". Mismo nivel que el original.';
-
-    const prompt = `Eres un experto psicometrista del DEMRE, especializado en construcción de ítemes PAES Chile.
-
-Analiza TODOS los documentos adjuntos (pruebas PAES oficiales) e identifica ítemes del eje "${eje || 'que detectes'}".
-
-Genera ${cant} ítemes CLONADOS de alta calidad siguiendo ESTRICTAMENTE el estilo DEMRE:
-
-CRITERIOS DE CALIDAD OBLIGATORIOS:
-1. Habilidad cognitiva: Identifica si es Representar, Modelar, Resolver o Argumentar (marco DEMRE) y consérvala exactamente.
-2. Enunciado: Contexto situado y realista. Usa situaciones cotidianas chilenas cuando corresponda.
-3. Alternativas: Exactamente 4 (A, B, C, D). La clave debe ser inequívocamente correcta. Los 3 distractores deben representar errores típicos REALES de estudiantes (error de signo, confusión de fórmula, operación incorrecta, etc.).
-4. Justificación: Para cada distractor, explica exactamente QUÉ error conceptual o procedimental lo genera.
-5. Formato numérico: Usa números similares al original en dificultad de cálculo.
-
-PARA FIGURAS Y TABLAS (MUY IMPORTANTE para Matemática):
-- Si el ítem requiere figura geométrica, gráfico cartesiano u otro elemento visual: pon "tiene_figura": true y en "descripcion_figura" describe con EXACTITUD qué dibujar.
-- Si hay tabla de datos: en "tabla_datos" entrega los datos en formato texto con columnas separadas por | y filas por \\n. Ejemplo: "x | f(x)\\n1 | 3\\n2 | 7"
-
-${asig ? `Asignatura: ${asig}` : 'Detecta la asignatura de los documentos.'}
-${extra ? `Instrucción adicional del docente: ${extra}` : ''}
-${varTxt}
-
-CRÍTICO: Responde ÚNICAMENTE con JSON válido y completo. Sin texto antes ni después. Sin markdown. Sin truncar.
-
-Formato exacto:
-[{"numero":1,"asignatura":"Matemática M1","eje":"Álgebra y Funciones","habilidad":"Modelar","nivel_cognitivo":"Aplicar","item_original_referencia":"PAES 2024 Regular Ítem 12","tiene_figura":false,"tabla_datos":null,"validez_paes":"Ítem válido: conserva habilidad Modelar, distractores basados en errores procedimentales típicos","variantes":[{"dificultad":"Fácil","enunciado":"Enunciado con LaTeX $x^2$ si aplica","descripcion_figura":null,"alternativas":[{"letra":"A","texto":"Texto","es_clave":false,"justificacion":"Error típico"},{"letra":"B","texto":"Texto","es_clave":true,"justificacion":"Procedimiento correcto"},{"letra":"C","texto":"Texto","es_clave":false,"justificacion":"Error"},{"letra":"D","texto":"Texto","es_clave":false,"justificacion":"Error"}]}]}]`;
-
-    parts.push({ type: 'text', text: prompt });
-
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apikey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-opus-4-5',
-        max_tokens: 16000,
-        messages: [{ role: 'user', content: parts }]
-      })
-    });
-
-    if (!resp.ok) {
-      const err = await resp.json();
-      throw new Error(err.error?.message || `Error ${resp.status}`);
-    }
-
-    const data = await resp.json();
-    const raw = data.content.map(c => c.text || '').join('');
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(clean);
-    window._R = result;
-    render(result);
-    setStatus('', false);
-    document.getElementById('export-section').style.display = 'block';
-  } catch (err) {
+    todos.forEach((item,i) => item.numero=i+1);
+    window._R = todos;
+    render(todos);
+    setStatus('',false);
+    document.getElementById('export-section').style.display='block';
+  } catch(err) {
     setStatus(`❌ Error: ${err.message}`);
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = '✨ Generar clones PAES';
+    btn.disabled=false; btn.innerHTML='✨ Generar clones PAES';
   }
 }
-
-const tagMap = { 'Fácil': 'tf', 'Medio': 'tm', 'Difícil': 'td', 'Clon': 'tc' };
-const tagColors = { 'Fácil': '#3B6D11', 'Medio': '#854F0B', 'Difícil': '#A32D2D', 'Clon': '#185FA5' };
-
+ 
+const tagMap={'Fácil':'tf','Medio':'tm','Difícil':'td','Clon':'tc'};
+const tagColors={'Fácil':'#3B6D11','Medio':'#854F0B','Difícil':'#A32D2D','Clon':'#185FA5'};
+ 
 function render(items) {
   const out = document.getElementById('out');
-  let html = '';
-  items.forEach((item, ii) => {
-    html += `
-    <div class="icard" style="margin-bottom:1.5rem">
+  let html='';
+  items.forEach((item,ii) => {
+    html+=`<div class="icard" style="margin-bottom:1.5rem">
       <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid #f0f0f0">
         <div style="font-size:16px;font-weight:600;margin-bottom:6px;color:#1D9E75">Ítem ${item.numero}</div>
         <div class="meta-bar">
           <span class="chip">📚 ${item.asignatura}</span>
           <span class="chip">Eje: ${item.eje}</span>
           <span class="chip chip-hab">🧠 ${item.habilidad} · ${item.nivel_cognitivo}</span>
-          ${item.tiene_figura ? '<span class="chip chip-fig">🖼 Requiere figura</span>' : ''}
-          ${item.tabla_datos ? '<span class="chip chip-fig">📊 Incluye tabla</span>' : ''}
+          ${item.tiene_figura?'<span class="chip chip-fig">🖼 SVG generado</span>':''}
+          ${item.tabla_datos?'<span class="chip chip-fig">📊 Tabla</span>':''}
         </div>
         <div class="validez-box"><strong>Validez PAES:</strong> ${item.validez_paes}</div>
         <div class="ref-txt">Ref: ${item.item_original_referencia}</div>
       </div>`;
-
-    if (item.variantes.length > 1) {
-      html += `<div class="vtabs">${item.variantes.map((v, i) =>
-        `<button class="vtab ${i === 0 ? 'on' : ''}" onclick="tab(${ii},${i})">${v.dificultad}</button>`
-      ).join('')}</div>`;
+ 
+    if (item.variantes.length>1) {
+      html+=`<div class="vtabs">${item.variantes.map((v,i)=>
+        `<button class="vtab ${i===0?'on':''}" onclick="tab(${ii},${i})">${v.dificultad}</button>`).join('')}</div>`;
     }
-
-    item.variantes.forEach((v, vi) => {
-      const tc = tagMap[v.dificultad] || 'tc';
-      html += `
-      <div class="vc-${ii}" id="vc-${ii}-${vi}" style="${vi > 0 ? 'display:none' : ''}">
+ 
+    item.variantes.forEach((v,vi) => {
+      const tc=tagMap[v.dificultad]||'tc';
+      html+=`<div class="vc-${ii}" id="vc-${ii}-${vi}" style="${vi>0?'display:none':''}">
         <div class="icard-head">
           <span class="tag ${tc}">${v.dificultad}</span>
           <button class="cpbtn" onclick="cp(${ii},${vi})">📋 Copiar</button>
         </div>
-        ${v.descripcion_figura ? `<div class="fig-box">🖼 <strong>Figura requerida:</strong> ${v.descripcion_figura}</div>` : ''}
-        ${item.tabla_datos ? `<div class="tabla-box">📊 Tabla de datos:\n${item.tabla_datos}</div>` : ''}
+        ${item.svg_figura?`<div class="svg-box">${item.svg_figura}</div>`:''}
+        ${item.tabla_datos?`<div class="tabla-box">📊 Tabla:\n${item.tabla_datos}</div>`:''}
         <div class="enun" id="enun-${ii}-${vi}">${v.enunciado}</div>
-        <div class="opts">${v.alternativas.map(a => `
-          <div class="opt ${a.es_clave ? 'ck' : ''}">
+        <div class="opts">${v.alternativas.map(a=>`
+          <div class="opt ${a.es_clave?'ck':''}">
             <span class="letra">${a.letra}</span>
             <span id="alt-${ii}-${vi}-${a.letra}">${a.texto}</span>
-          </div>`).join('')}
-        </div>
+          </div>`).join('')}</div>
         <div>
-          <p class="jlabel">Justificación de alternativas</p>
-          ${v.alternativas.map(a => `
-            <div class="ji">
-              <strong>${a.letra} — ${a.es_clave ? '✓ Clave' : 'Distractor'}:</strong> ${a.justificacion}
-            </div>`).join('')}
+          <p class="jlabel">Justificación</p>
+          ${v.alternativas.map(a=>`<div class="ji"><strong>${a.letra} — ${a.es_clave?'✓ Clave':'Distractor'}:</strong> ${a.justificacion}</div>`).join('')}
         </div>
       </div>`;
     });
-    html += `</div><div class="divider"></div>`;
+    html+=`</div><div class="divider"></div>`;
   });
-
-  out.innerHTML = html;
-  if (window.MathJax && window.MathJax.typesetPromise) {
-    MathJax.typesetPromise([out]).catch(() => {});
-  } else {
-    const poll = setInterval(() => {
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        clearInterval(poll);
-        MathJax.typesetPromise([out]).catch(() => {});
-      }
-    }, 300);
-  }
+ 
+  out.innerHTML=html;
+  if (window.MathJax&&window.MathJax.typesetPromise) MathJax.typesetPromise([out]).catch(()=>{});
+  else { const p=setInterval(()=>{ if(window.MathJax&&window.MathJax.typesetPromise){clearInterval(p);MathJax.typesetPromise([out]).catch(()=>{});}},300); }
 }
-
-function tab(ii, vi) {
-  document.querySelectorAll(`.vc-${ii}`).forEach((el, i) => el.style.display = i === vi ? 'block' : 'none');
-  document.querySelectorAll(`[onclick^="tab(${ii},"]`).forEach((el, i) => el.classList.toggle('on', i === vi));
-  if (window.MathJax && window.MathJax.typesetPromise)
-    MathJax.typesetPromise([document.getElementById(`vc-${ii}-${vi}`)]).catch(() => {});
+ 
+function tab(ii,vi) {
+  document.querySelectorAll(`.vc-${ii}`).forEach((el,i)=>el.style.display=i===vi?'block':'none');
+  document.querySelectorAll(`[onclick^="tab(${ii},"]`).forEach((el,i)=>el.classList.toggle('on',i===vi));
+  if(window.MathJax&&window.MathJax.typesetPromise) MathJax.typesetPromise([document.getElementById(`vc-${ii}-${vi}`)]).catch(()=>{});
 }
-
-function cp(ii, vi) {
-  const item = window._R[ii];
-  const v = item.variantes[vi];
-  let txt = `ÍTEM ${item.numero} — ${item.asignatura} | ${item.eje} | ${item.habilidad}\n[${v.dificultad}]\n\n${v.enunciado}\n\n`;
-  if (v.descripcion_figura) txt += `[FIGURA: ${v.descripcion_figura}]\n\n`;
-  if (item.tabla_datos) txt += `[TABLA:\n${item.tabla_datos}]\n\n`;
-  v.alternativas.forEach(a => { txt += `${a.letra}) ${a.texto}${a.es_clave ? ' ← Clave' : ''}\n`; });
-  txt += '\n--- Justificación ---\n';
-  v.alternativas.forEach(a => { txt += `${a.letra} (${a.es_clave ? 'Clave' : 'Distractor'}): ${a.justificacion}\n`; });
-  navigator.clipboard.writeText(txt).then(() => {
-    const btns = document.querySelectorAll('.cpbtn');
-    const idx = ii * (window._R[ii].variantes.length) + vi;
-    if (btns[idx]) { btns[idx].textContent = '✓ Copiado'; setTimeout(() => { btns[idx].textContent = '📋 Copiar'; }, 2000); }
+ 
+function cp(ii,vi) {
+  const item=window._R[ii]; const v=item.variantes[vi];
+  let txt=`ÍTEM ${item.numero} — ${item.asignatura} | ${item.eje} | ${item.habilidad}\n[${v.dificultad}]\n\n${v.enunciado}\n\n`;
+  if(item.tabla_datos) txt+=`[TABLA:\n${item.tabla_datos}]\n\n`;
+  v.alternativas.forEach(a=>{ txt+=`${a.letra}) ${a.texto}${a.es_clave?' ← Clave':''}\n`; });
+  txt+='\n--- Justificación ---\n';
+  v.alternativas.forEach(a=>{ txt+=`${a.letra} (${a.es_clave?'Clave':'Distractor'}): ${a.justificacion}\n`; });
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btns=document.querySelectorAll('.cpbtn');
+    const idx=ii*(window._R[ii].variantes.length)+vi;
+    if(btns[idx]){btns[idx].textContent='✓ Copiado';setTimeout(()=>{btns[idx].textContent='📋 Copiar';},2000);}
   });
 }
-
-// ── Genera HTML imprimible con MathJax embebido ───────────────────────────
-function buildPrintHTML(soloClaves) {
+ 
+// ── Construcción del HTML imprimible ─────────────────────────────────────
+function buildHTML(limpio) {
   const fecha = new Date().toLocaleDateString('es-CL');
-  let items_html = '';
-
-  window._R.forEach((item, ii) => {
+  let body='', pauta='';
+ 
+  window._R.forEach((item) => {
     item.variantes.forEach(v => {
-      items_html += `
-      <div class="item-block">
+      body+=`<div class="item-block">
         <div class="item-header">
           <span class="item-num">Ítem ${item.numero}</span>
-          <span class="item-meta">${item.asignatura} · ${item.eje} · ${item.habilidad}</span>
+          ${!limpio?`<span class="item-meta">${item.asignatura} · ${item.eje} · ${item.habilidad}</span>`:''}
           <span class="dif-tag" style="background:${tagColors[v.dificultad]||'#185FA5'}">${v.dificultad}</span>
         </div>`;
-
+ 
+      // SVG figura
+      if (item.svg_figura) {
+        body+=`<div class="svg-wrap">${item.svg_figura}</div>`;
+      }
+ 
+      // Tabla
       if (item.tabla_datos) {
-        // Convertir tabla de texto a HTML
-        const rows = item.tabla_datos.split('\n').filter(r => r.trim());
-        items_html += `<table class="data-table"><tbody>`;
-        rows.forEach((row, ri) => {
-          const cells = row.split('|').map(c => c.trim());
-          items_html += `<tr>${cells.map(c => ri === 0 ? `<th>${c}</th>` : `<td>${c}</td>`).join('')}</tr>`;
+        const rows=item.tabla_datos.split('\n').filter(r=>r.trim());
+        body+=`<table class="data-table"><tbody>`;
+        rows.forEach((row,ri)=>{
+          const cells=row.split('|').map(c=>c.trim());
+          body+=`<tr>${cells.map(c=>ri===0?`<th>${c}</th>`:`<td>${c}</td>`).join('')}</tr>`;
         });
-        items_html += `</tbody></table>`;
+        body+=`</tbody></table>`;
       }
-
-      if (v.descripcion_figura) {
-        items_html += `<div class="fig-note">🖼 <strong>Figura:</strong> ${v.descripcion_figura}</div>`;
-      }
-
-      items_html += `<div class="enunciado">${v.enunciado}</div><div class="alternativas">`;
-      v.alternativas.forEach(a => {
-        items_html += `<div class="alt ${a.es_clave ? 'clave' : ''}"><span class="alt-letra">${a.letra})</span> ${a.texto}</div>`;
+ 
+      body+=`<div class="enunciado">${v.enunciado}</div><div class="alternativas">`;
+      v.alternativas.forEach(a=>{
+        body+=`<div class="alt${(!limpio&&a.es_clave)?' clave':''}"><span class="alt-letra">${a.letra})</span> ${a.texto}</div>`;
       });
-      items_html += `</div>`;
-
-      if (soloClaves) {
-        const clave = v.alternativas.find(a => a.es_clave);
-        if (clave) items_html += `<div class="clave-line">Clave: <strong>${clave.letra}</strong></div>`;
-      } else {
-        items_html += `<div class="justif-block"><p class="justif-title">Justificación:</p>`;
-        v.alternativas.forEach(a => {
-          items_html += `<p class="justif-item"><strong>${a.letra} (${a.es_clave ? 'Clave' : 'Distractor'}):</strong> ${a.justificacion}</p>`;
+      body+=`</div>`;
+ 
+      if (!limpio) {
+        body+=`<div class="justif-block"><p class="justif-title">Justificación:</p>`;
+        v.alternativas.forEach(a=>{
+          body+=`<p class="justif-item"><strong>${a.letra} (${a.es_clave?'Clave':'Distractor'}):</strong> ${a.justificacion}</p>`;
         });
-        items_html += `</div>`;
+        body+=`</div>`;
       }
-
-      items_html += `</div>`;
+ 
+      body+=`</div>`;
+ 
+      // Acumular pauta para PDF limpio
+      if (limpio) {
+        const clave=v.alternativas.find(a=>a.es_clave);
+        pauta+=`<span class="p-item">Ítem ${item.numero} (${v.dificultad}): <strong>${clave?clave.letra:'?'}</strong></span>`;
+      }
     });
   });
-
+ 
+  const pautaHTML = limpio && pauta ? `
+    <div style="margin-top:3rem;padding-top:1rem;border-top:2px solid #333">
+      <h2 style="font-size:14px;margin-bottom:.75rem">PAUTA DE RESPUESTAS</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:13px">${pauta}</div>
+    </div>` : '';
+ 
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Ítemes Clonados PAES — ${fecha}</title>
+<title>${limpio?'Prueba':'Ítemes'} PAES — ${fecha}</title>
 <script>
-window.MathJax = {
-  tex: { inlineMath: [['$','$'],['\\\\(','\\\\)']], displayMath: [['$$','$$'],['\\\\[','\\\\]']] },
-  options: { skipHtmlTags: ['script','noscript','style','textarea'] }
-};
+window.MathJax={tex:{inlineMath:[['$','$'],['\\\\(','\\\\)']],displayMath:[['$$','$$'],['\\\\[','\\\\]']]},options:{skipHtmlTags:['script','noscript','style','textarea']}};
 <\/script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"><\/script>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; color: #111; font-size: 14px; }
-  h1 { color: #1D9E75; border-bottom: 2px solid #1D9E75; padding-bottom: .5rem; margin-bottom: .25rem; }
-  .fecha { color: #888; font-size: 12px; margin-bottom: 2rem; }
-  .item-block { margin-bottom: 2rem; padding: 1.25rem; border: 1px solid #ddd; border-radius: 8px; page-break-inside: avoid; }
-  .item-header { display: flex; align-items: center; gap: 10px; margin-bottom: .75rem; flex-wrap: wrap; }
-  .item-num { font-weight: 700; font-size: 16px; color: #1D9E75; }
-  .item-meta { font-size: 12px; color: #666; flex: 1; }
-  .dif-tag { font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 20px; color: #fff; }
-  .enunciado { font-size: 15px; line-height: 1.8; margin-bottom: 1rem; }
-  .alternativas { display: flex; flex-direction: column; gap: 5px; margin-bottom: .75rem; }
-  .alt { padding: 7px 12px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 14px; line-height: 1.6; }
-  .alt.clave { border-color: #1D9E75; background: #f0faf5; font-weight: 600; }
-  .alt-letra { font-weight: 700; margin-right: 6px; }
-  .clave-line { font-size: 13px; color: #1D9E75; font-weight: 600; margin-top: 4px; }
-  .justif-block { margin-top: .75rem; padding: .75rem; background: #f8f8f8; border-radius: 6px; font-size: 12px; }
-  .justif-title { font-weight: 700; color: #666; text-transform: uppercase; font-size: 11px; margin-bottom: 4px; }
-  .justif-item { margin-bottom: 3px; color: #444; line-height: 1.5; }
-  .fig-note { font-size: 13px; padding: 8px 12px; background: #fff8ee; border-left: 3px solid #EF9F27; border-radius: 6px; margin-bottom: .75rem; color: #7a4c0a; }
-  .data-table { border-collapse: collapse; margin-bottom: .75rem; font-size: 13px; }
-  .data-table th, .data-table td { border: 1px solid #ccc; padding: 5px 12px; text-align: center; }
-  .data-table th { background: #f0f0f0; font-weight: 700; }
-  @media print {
-    body { margin: 0; padding: 1cm; }
-    .item-block { page-break-inside: avoid; }
-  }
+body{font-family:Arial,sans-serif;max-width:760px;margin:2rem auto;padding:0 1.5rem;color:#111;font-size:14px}
+h1{${limpio?'font-size:18px;text-align:center;':'color:#1D9E75;'}border-bottom:2px solid ${limpio?'#111':'#1D9E75'};padding-bottom:.5rem;margin-bottom:.25rem}
+.fecha{color:#888;font-size:12px;margin-bottom:2rem;${limpio?'text-align:center':''}}
+.item-block{margin-bottom:2rem;padding:1.25rem;border:1px solid #ddd;border-radius:6px;page-break-inside:avoid}
+.item-header{display:flex;align-items:center;gap:10px;margin-bottom:.75rem;flex-wrap:wrap}
+.item-num{font-weight:700;font-size:15px;${limpio?'color:#111':'color:#1D9E75'}}
+.item-meta{font-size:12px;color:#666;flex:1}
+.dif-tag{font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;color:#fff}
+.enunciado{font-size:15px;line-height:1.8;margin-bottom:1rem}
+.alternativas{display:flex;flex-direction:column;gap:5px;margin-bottom:.75rem}
+.alt{padding:7px 12px;border:1px solid #e0e0e0;border-radius:6px;font-size:14px;line-height:1.6}
+.alt.clave{border-color:#1D9E75;background:#f0faf5;font-weight:600}
+.alt-letra{font-weight:700;margin-right:6px}
+.justif-block{margin-top:.75rem;padding:.75rem;background:#f8f8f8;border-radius:6px;font-size:12px}
+.justif-title{font-weight:700;color:#666;text-transform:uppercase;font-size:11px;margin-bottom:4px}
+.justif-item{margin-bottom:3px;color:#444;line-height:1.5}
+.svg-wrap{text-align:center;margin-bottom:.75rem;padding:8px;background:#fafafa;border:1px solid #eee;border-radius:6px}
+.svg-wrap svg{max-width:100%;height:auto}
+.data-table{border-collapse:collapse;margin-bottom:.75rem;font-size:13px}
+.data-table th,.data-table td{border:1px solid #ccc;padding:5px 12px;text-align:center}
+.data-table th{background:#f0f0f0;font-weight:700}
+.p-item{display:inline-block;padding:3px 8px;background:#f0f0f0;border-radius:4px;border:1px solid #ccc}
+@media print{body{margin:0;padding:1cm}.item-block{page-break-inside:avoid}}
 </style>
 </head>
 <body>
-<h1>Ítemes Clonados PAES</h1>
+<h1>${limpio?'Prueba de Práctica PAES':'Ítemes Clonados PAES'}</h1>
 <p class="fecha">Generado: ${fecha}</p>
-${items_html}
+${body}
+${pautaHTML}
 </body>
 </html>`;
 }
-
-function exportarHTML() {
-  if (!window._R || !window._R.length) return;
-  const html = buildPrintHTML(false);
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `clones-paes-${new Date().toISOString().slice(0,10)}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+ 
+function exportarHTML(limpio) {
+  if (!window._R||!window._R.length) return;
+  const html=buildHTML(limpio);
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`clones-paes-${limpio?'limpio-':''}${new Date().toISOString().slice(0,10)}.html`;
+  a.click(); URL.revokeObjectURL(url);
 }
-
-function exportarPDF() {
-  if (!window._R || !window._R.length) return;
-  const html = buildPrintHTML(false);
-  const win = window.open('', '_blank');
+ 
+function exportarPDF(limpio) {
+  if (!window._R||!window._R.length) return;
+  const html=buildHTML(limpio);
+  const win=window.open('','_blank');
   win.document.write(html);
   win.document.close();
-  // Esperar a que MathJax renderice antes de imprimir
-  win.addEventListener('load', () => {
-    setTimeout(() => { win.focus(); win.print(); }, 2500);
-  });
+  win.addEventListener('load',()=>{ setTimeout(()=>{ win.focus(); win.print(); },2500); });
 }
 </script>
 </body>
