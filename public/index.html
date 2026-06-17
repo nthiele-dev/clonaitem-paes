@@ -87,6 +87,8 @@ textarea{resize:vertical;min-height:70px;line-height:1.5}
 .tabla-rendered th,.tabla-rendered td{border:1px solid #ccc;padding:6px 14px;text-align:center}
 .tabla-rendered th{background:#f0f4ff;font-weight:700;color:#1a3a7a}
 .tabla-rendered td{background:#fff}
+.solucionario-box{margin-top:.75rem;padding:10px 14px;background:#f0faf5;border-radius:8px;border-left:3px solid #1D9E75}
+.solucionario-texto{font-size:14px;line-height:1.8;color:#1a1a1a;margin-top:4px}
 @media(max-width:560px){.grid{grid-template-columns:1fr}.export-bar{flex-direction:column}}
 </style>
 </head>
@@ -258,8 +260,10 @@ ${asig?`Asignatura: ${asig}`:'Detecta la asignatura.'}
 ${extra?`Instrucción adicional: ${extra}`:''}
 ${varTxt}
 
+SOLUCIONARIO: En cada variante incluye "solucionario" con el desarrollo paso a paso completo de la solución correcta. Debe mostrar el procedimiento matemático/conceptual para llegar a la clave, con LaTeX donde corresponda. Mínimo 3-4 pasos explicados.
+
 RESPONDE SOLO JSON VÁLIDO, sin markdown, sin truncar:
-[{"numero":${numInicio},"asignatura":"","eje":"","habilidad":"","nivel_cognitivo":"","item_original_referencia":"","tiene_figura":false,"svg_figura":null,"tabla_datos":null,"validez_paes":"","variantes":[{"dificultad":"Fácil","enunciado":"","alternativas":[{"letra":"A","texto":"","es_clave":false,"justificacion":""},{"letra":"B","texto":"","es_clave":true,"justificacion":""},{"letra":"C","texto":"","es_clave":false,"justificacion":""},{"letra":"D","texto":"","es_clave":false,"justificacion":""}]}]}]`;
+[{"numero":${numInicio},"asignatura":"","eje":"","habilidad":"","nivel_cognitivo":"","item_original_referencia":"","tiene_figura":false,"svg_figura":null,"tabla_datos":null,"validez_paes":"","variantes":[{"dificultad":"Fácil","enunciado":"","solucionario":"Desarrollo paso a paso de la solución correcta, explicando el procedimiento completo para llegar a la clave.","alternativas":[{"letra":"A","texto":"","es_clave":false,"justificacion":""},{"letra":"B","texto":"","es_clave":true,"justificacion":""},{"letra":"C","texto":"","es_clave":false,"justificacion":""},{"letra":"D","texto":"","es_clave":false,"justificacion":""}]}]}]`;
 
   const parts = [...pdfParts, {type:'text', text:prompt}];
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -370,17 +374,19 @@ function render(items) {
             <span id="alt-${ii}-${vi}-${a.letra}">${a.texto}</span>
           </div>`).join('')}</div>
         <div>
-          <p class="jlabel">Justificación</p>
+          <p class="jlabel">Justificación de alternativas</p>
           ${v.alternativas.map(a=>`<div class="ji"><strong>${a.letra} — ${a.es_clave?'✓ Clave':'Distractor'}:</strong> ${a.justificacion}</div>`).join('')}
         </div>
+        ${v.solucionario?`<div class="solucionario-box"><p class="jlabel">✏️ Solucionario</p><div class="solucionario-texto" id="sol-${ii}-${vi}">${v.solucionario}</div></div>`:''}
       </div>`;
     });
     html+=`</div><div class="divider"></div>`;
   });
 
   out.innerHTML=html;
-  if (window.MathJax&&window.MathJax.typesetPromise) MathJax.typesetPromise([out]).catch(()=>{});
-  else { const p=setInterval(()=>{ if(window.MathJax&&window.MathJax.typesetPromise){clearInterval(p);MathJax.typesetPromise([out]).catch(()=>{});}},300); }
+  const typesetAll = () => MathJax.typesetPromise([out]).catch(()=>{});
+  if (window.MathJax&&window.MathJax.typesetPromise) typesetAll();
+  else { const p=setInterval(()=>{ if(window.MathJax&&window.MathJax.typesetPromise){clearInterval(p);typesetAll();}},300); }
 }
 
 function tab(ii,vi) {
@@ -448,11 +454,14 @@ function buildHTML(modo) {
 
       // Solo en completo: justificación
       if (!limpio) {
-        body+=`<div class="justif-block"><p class="justif-title">Justificación:</p>`;
+        body+=`<div class="justif-block"><p class="justif-title">Justificación de alternativas:</p>`;
         v.alternativas.forEach(a=>{
           body+=`<p class="justif-item"><strong>${a.letra} (${a.es_clave?'Clave':'Distractor'}):</strong> ${a.justificacion}</p>`;
         });
         body+=`</div>`;
+        if (v.solucionario) {
+          body+=`<div class="solucionario-block"><p class="sol-title">✏️ Solucionario</p><p class="sol-texto">${v.solucionario}</p></div>`;
+        }
       }
 
       body+=`</div>`;
@@ -491,6 +500,9 @@ h1{${limpio?'font-size:18px;text-align:center;':'color:#1D9E75;'}border-bottom:2
 .data-table th,.data-table td{border:1px solid #ccc;padding:5px 12px;text-align:center}
 .data-table th{background:#f0f0f0;font-weight:700}
 .p-item{display:inline-block;padding:3px 8px;background:#f0f0f0;border-radius:4px;border:1px solid #ccc}
+.solucionario-block{margin-top:.75rem;padding:10px 14px;background:#f0faf5;border-radius:6px;border-left:3px solid #1D9E75;page-break-inside:avoid}
+.sol-title{font-weight:700;font-size:11px;color:#0F6E56;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.sol-texto{font-size:13px;line-height:1.7;color:#1a1a1a}
 @media print{body{margin:0;padding:1cm}.item-block{page-break-inside:avoid}}
 </style>
 </head>
